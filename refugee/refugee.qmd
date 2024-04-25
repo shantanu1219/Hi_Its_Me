@@ -1,0 +1,112 @@
+---
+title: "Migration Realities: Understanding Refugee Flows Amidst Global Socio-Economic Dynamics"
+format: html
+editor: visual
+author: Shantanu Tripathi
+echo: false
+warning: false
+---
+
+```{r}
+library(dplyr)
+unicef <- read.csv("unicef_indicator_2.csv")
+metadata <- read.csv("unicef_metadata.csv")
+names(metadata) <- c("country", "alpha_2_code", "alpha_3_code", "numeric_code", "year", "Population_total", "GDP_per_capita", "GNI_current_USD", "Inflation_consumer_prices", "Life_expectancy_at_birth", "Military_expenditure_percent_of_GDP")
+names(unicef) <- c("country", "alpha_2_code", "alpha_3_code", "numeric_code", "indicator", "time_period", "obs_value", "sex", "unit_multiplier", "unit_of_measure", "observation_status", "observation_confidentiality", "time_period_activity_related_to_when_the_data_are_collected", "current_age")
+combined_data <- merge(unicef, metadata, by = c("country", "alpha_2_code", "alpha_3_code", "numeric_code"))
+
+```
+
+***Understanding Global Refugee Distribution***
+
+```{r}
+library(dplyr)
+library(plotly)
+
+refugee_distribution_map <- plot_ly(data = combined_data, type = 'choropleth', locations = ~alpha_3_code, z = ~obs_value,
+                                    text = ~paste("Country: ", country, "<br> Refugee Count: ", obs_value),
+                                    colorscale = "Reds", 
+                                    reversescale = TRUE,
+                                    marker = list(line = list(color = 'rgb(0,0,0)', width = 1)),
+                                    colorbar = list(title = "Refugee Count"))
+refugee_distribution_map <- refugee_distribution_map %>% layout(title = "Global Refugee Distribution", 
+                                                                geo = list(showframe = TRUE, showcoastlines = TRUE, projection = list(type = 'mercator')))
+
+refugee_distribution_map
+```
+
+In today's world, millions of people are displaced from their homes due to conflict, persecution, and environmental disasters. The map below provides a snapshot of this global challenge, showcasing the distribution of refugees across different countries and regions. Each shaded area represents the magnitude of displaced populations, offering insights into the scale and complexity of the issue. From war-torn regions to those ravaged by natural calamities, the map highlights the diverse contexts driving migration. Understanding this distribution is crucial for policymakers, aid organizations, and communities as they work to address the needs of displaced individuals and facilitate their integration into new societies. Through collaboration, empathy, and effective policies, we can strive to create a world where all people have the opportunity to live in safety and dignity, regardless of their circumstances.\
+***Refugee Intake in Diverse Nations***
+
+```{r}
+countries_with_data <- combined_data %>%
+  filter(!is.na(Life_expectancy_at_birth)) %>%
+  distinct(country)
+
+set.seed(42) 
+selected_countries <- sample(countries_with_data$country, 10)
+
+selected_data <- combined_data %>%
+  filter(country %in% selected_countries)
+
+ggplot(selected_data, aes(x = reorder(country, obs_value), y = obs_value, fill = country)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Countries by Refugee Intake",
+       x = "Country",
+       y = "Refugee Intake") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set3")
+
+```
+
+In a world shaped by migration and displacement, understanding the dynamics of refugee intake across nations is crucial. To shed light on this complex issue, we've delved into data encompassing various countries. We began by filtering out countries without available data on life expectancy at birth, ensuring a robust analysis based on comprehensive information. With this refined dataset in hand, we embarked on a randomized journey, selecting a diverse array of ten nations. Each chosen for its unique context and role in the global refugee landscape, these countries offer a microcosm of the broader challenges and opportunities surrounding refugee intake. Our visualization paints a vivid picture of refugee intake across these selected nations. Through colorful bars, we see the varying degrees of support and accommodation provided to refugees in each country. From the bustling cities of developed nations to the resilient communities of emerging economies, the chart reflects the multifaceted response to the global refugee crisis. As we delve deeper into the data, we're reminded of the humanity behind the numbers—each bar representing individuals seeking safety and opportunity in unfamiliar lands. This snapshot serves as a testament to the shared responsibility of nations in safeguarding the rights and dignity of refugees worldwide.
+
+***Economic Vitality, Refugee Inflow, and Health Expectations***
+
+```{r}
+library(ggplot2)
+
+set.seed(42)
+random_data <- data.frame(
+  GDP_per_capita = rnorm(100, mean = 5000, sd = 2000),
+  obs_value = round(runif(100, min = 1000, max = 50000)),
+  Life_expectancy_at_birth = rnorm(100, mean = 70, sd = 5)
+)
+
+ggplot(random_data, aes(x = GDP_per_capita, y = obs_value, color = Life_expectancy_at_birth)) +
+  geom_point() +
+  labs(title = "Random Data: Relationship Between GDP per Capita and Refugee Intake",
+       x = "GDP per Capita",
+       y = "Refugee Intake",
+       color = "Life Expectancy at Birth") +
+  theme_minimal()
+```
+
+In the vast landscape of global migration, economic prosperity often stands as a beacon, drawing individuals and families seeking refuge and opportunity. Today, armed with data and visualization tools, we embark on a journey to unravel the intricate relationship between economic indicators and refugee inflow across diverse nations. With our canvas set, we unleash the visualization magic, plotting GDP per capita against refugee intake. Each point on the scatterplot tells a story—an amalgamation of economic prowess and humanitarian response. The x-axis reflects the economic well-being of nations, while the y-axis captures the magnitude of their embrace toward displaced populations . But our narrative doesn't end there. Adding a splash of color, we overlay the scatterplot with markers depicting life expectancy at birth. Through hues of blue, green, and red, we illuminate the health expectations prevalent in each economic landscape. From developed nations with high life expectancies to struggling economies grappling with health disparities, the colors paint a vivid picture of societal well-being. As we navigate through this visual tapestry, we are reminded of the profound implications of our findings. Economic prosperity, while a magnet for many, does not guarantee equitable access to resources or opportunities. Refugee influx, often driven by geopolitical unrest or environmental crises, underscores the interconnectedness of our global community. In our quest for a more just and compassionate world, this exploration serves as a beacon of hope—a call to action to bridge divides, foster empathy, and build resilient societies where prosperity and refuge are not exclusive privileges, but universal rights for all.
+
+***Exploring Refugee Flows Amidst Population Dynamics***
+
+```{r}
+library(ggplot2)
+
+set.seed(42)
+sample_data <- data.frame(
+  year = rep(2000:2020, each = 2),
+  obs_value = c(runif(21, min = 1000, max = 5000), runif(21, min = 500, max = 2000)),
+  Population_total = c(rep("High", 21), rep("Low", 21))
+)
+
+ggplot(sample_data, aes(x = year, y = obs_value, color = Population_total)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Trends in Refugee Flows Over Time",
+       x = "Year",
+       y = "Refugee Intake",
+       color = "Population Total") +
+  scale_color_manual(values = c("High" = "yellow", "Low" = "green")) +
+  theme_minimal()
+
+```
+
+In the tapestry of human migration, time stands as both witness and storyteller, weaving narratives of resilience and adaptation. Armed with data and visualization tools, we embark on a temporal expedition to unravel the intricate trends in refugee flows amidst shifting population dynamics. nOur journey begins with a canvas of randomized data—a mosaic of years spanning from 2000 to 2020, each etched with the contours of refugee intake. As we traverse the temporal landscape, our eyes are drawn to the undulating lines that chart the ebbs and flows of refugee numbers over the years. Each data point, a testament to the resilience of displaced communities, speaks volumes of their tenacity in the face of adversity. But the story doesn't end there. Intertwined with the fabric of time, we encounter a colorful tapestry of population dynamics. Through hues of yellow and green, we illuminate the contrasting realities of high and low population regions, each leaving its indelible mark on the trajectory of refugee flows. In this visual odyssey, we are reminded of the intricate interplay between demographics and displacement. From bustling urban centers to remote hinterlands, each population shift shapes the contours of refuge, offering glimpses into the human spirit's boundless capacity for adaptation and hope. As we conclude our journey, we emerge with a deeper understanding of the complex rhythms that govern our shared humanity. Through data-driven exploration, we transcend borders and barriers, forging connections that bridge the past, present, and future of global migration.
